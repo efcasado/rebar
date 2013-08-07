@@ -225,8 +225,10 @@ doterl_compile(Config, OutDir) ->
 
 doterl_compile(Config, OutDir, MoreSources) ->
     FirstErls = rebar_config:get_list(Config, erl_first_files, []),
+
     ErlOpts = rebar_utils:erl_opts(Config),
     ?DEBUG("erl_opts ~p~n", [ErlOpts]),
+
     %% Support the src_dirs option allowing multiple directories to
     %% contain erlang source. This might be used, for example, should
     %% eunit tests be separated from the core application source.

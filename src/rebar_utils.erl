@@ -289,12 +289,19 @@ erl_opts(Config) ->
     RawErlOpts = filter_defines(rebar_config:get(Config, erl_opts, []), []),
     Defines = [{d, list_to_atom(D)} ||
                   D <- rebar_config:get_xconf(Config, defines, [])],
-    Opts = Defines ++ RawErlOpts,
-    case proplists:is_defined(no_debug_info, Opts) of
-        true ->
-            [O || O <- Opts, O =/= no_debug_info];
-        false ->
-            [debug_info|Opts]
+    Opts0 = Defines ++ RawErlOpts,
+    Opts = case proplists:is_defined(no_debug_info, Opts0) of
+               true ->
+                   [O || O <- Opts0, O =/= no_debug_info];
+               false ->
+                   [debug_info|Opts0]
+           end,
+    case rebar_config:get(Config, aspects_file, undefined) of
+        undefined ->
+            Opts;
+        ADFFile ->
+            {ok, [Aspects]} = file:consult(ADFFile), 
+            Opts ++ [{parse_transform, weaver}, {aop_config, Aspects}]
     end.
 
 -spec src_dirs([string()]) -> [file:filename(), ...].
